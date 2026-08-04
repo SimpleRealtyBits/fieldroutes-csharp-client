@@ -35,38 +35,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump version
-        id: bump
-        env:
-          MSG: ${{ github.event.head_commit.message }}
-        run: |
-          VERSION=$(grep -oP '(?<=<Version>)[^<]+' fieldroutes-api-client.csproj)
-          MAJOR=$(echo "$VERSION" | awk -F. '{print $1}')
-          MINOR=$(echo "$VERSION" | awk -F. '{print $2}')
-          PATCH=$(echo "$VERSION" | awk -F. '{print $3}')
-          if [[ "$MSG" == *"[major]"* ]]; then
-            MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0
-          elif [[ "$MSG" == *"[minor]"* ]]; then
-            MINOR=$((MINOR+1)); PATCH=0
-          else
-            PATCH=$((PATCH+1))
-          fi
-          NEW="$MAJOR.$MINOR.$PATCH"
-          sed -i "s|<Version>$VERSION</Version>|<Version>$NEW</Version>|" fieldroutes-api-client.csproj
-          echo "version=$NEW" >> "$GITHUB_OUTPUT"
-
-      - name: Commit and tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add fieldroutes-api-client.csproj
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }} [skip ci]"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push
-          git push origin "v${{ steps.bump.outputs.version }}"
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
@@ -74,9 +42,14 @@ jobs:
       - name: Add GitHub Packages source
         run: dotnet nuget add source --username SimpleRealtyBits --password '${{ secrets.GITHUB_TOKEN }}' --store-password-in-clear-text --name github "https://nuget.pkg.github.com/SimpleRealtyBits/index.json"
 
-      - name: Pack and push
+      - name: Tag and publish
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' fieldroutes-api-client.csproj)
+          if ! git ls-remote --tags origin "v$VERSION" | grep -q "refs/tags/v$VERSION"; then
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          fi
           dotnet pack -c Release -o ./artifacts
           dotnet nuget push ./artifacts/*.nupkg --source github --api-key "$NUGET_AUTH_TOKEN" --skip-duplicate
