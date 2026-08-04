@@ -17,18 +17,17 @@ The FieldRoutes API is not a standard REST API. The client follows the official 
 These decisions are handled inside the client; callers don't see any of it.
 
 ## Install
+```sh
+dotnet add package FieldRoutesApiClient --version 1.0.0 --source https://nuget.pkg.github.com/SimpleRealtyBits/index.json
+```
 
-The project is a plain .NET class library (`net10.0`) with one dependency: `Microsoft.Extensions.Http`.
-
-To consume it, add a project reference:
+Developing against the source instead, add a project reference:
 
 ```xml
 <ItemGroup>
   <ProjectReference Include="../fieldroutes-api-client/fieldroutes-api-client.csproj" />
 </ItemGroup>
 ```
-
-Or pack and install it as a NuGet package (`dotnet pack`, then `dotnet add package FieldRoutesApiClient`).
 
 ## Quick start
 
