@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>FieldRoutesApiClient</PackageId>
+        <Version>1.0.0</Version>
         <Description>Typed FieldRoutes (PestRoutes) API client. Generated from api.md; injectable
             via AddFieldRoutesClient.</Description>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
