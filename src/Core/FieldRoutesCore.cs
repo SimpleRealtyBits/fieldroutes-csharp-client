@@ -102,6 +102,13 @@ internal sealed class FieldRoutesCore
         EnsureEnvelopeOk(status, text, root);
         if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("result", out var result))
             return result.ValueKind == JsonValueKind.Null ? default! : result.Deserialize<T>(FrJson.Options)!;
+        // Some get endpoints (e.g. office/get) return the records under a plural key
+        // ({success, offices:[...]}) instead of the result envelope. Mirrors the official
+        // client's response[type + 's'] unwrap. Only applies when a list is expected.
+        if (root.ValueKind == JsonValueKind.Object
+            && typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>)
+            && root.TryGetProperty(entity + "s", out var plural) && plural.ValueKind == JsonValueKind.Array)
+            return plural.Deserialize<T>(FrJson.Options)!;
         return root.Deserialize<T>(FrJson.Options)!;
     }
 

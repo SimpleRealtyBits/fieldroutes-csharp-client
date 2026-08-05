@@ -145,6 +145,20 @@ public sealed class TransportTests
     }
 
     [Fact]
+    public async Task GetBulk_ParsesPluralKey_WhenNoResultEnvelope()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"offices":[{"officeID":1,"officeName":"Austin"},{"officeID":2,"officeName":"Dallas"}]}
+            """));
+
+        var offices = await api.Offices.GetBulkAsync(new[] { 1, 2 });
+
+        Assert.Equal(2, offices.Count);
+        Assert.Equal("Austin", offices[0].OfficeName);
+        Assert.Equal(2, offices[1].OfficeID);
+    }
+
+    [Fact]
     public async Task Create_ReturnsResultId_FromEnvelope()
     {
         var (api, handler) = Create(_ => TestHelpers.JsonResponse("""{"success":true,"result":42}"""));
