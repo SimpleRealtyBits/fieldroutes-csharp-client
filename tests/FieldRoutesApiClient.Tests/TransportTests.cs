@@ -159,6 +159,29 @@ public sealed class TransportTests
     }
 
     [Fact]
+    public async Task GetBulk_DirtyNumericStrings_CoercedToNullOrDefault()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"offices":[{"officeID":"7","officeName":"Austin","licenseNumber":"","companyID":"12.0","contactNumber":"abc"}],
+             "payments":[{"paymentID":"101","amount":"","unassignedAmount":"19.99"}]}
+            """));
+
+        var offices = await api.Offices.GetBulkAsync(new[] { 7 });
+        var payments = await api.Payments.GetBulkAsync(new[] { 101 });
+
+        var office = Assert.Single(offices);
+        Assert.Equal(7, office.OfficeID);
+        Assert.Null(office.LicenseNumber);
+        Assert.Equal(12, office.CompanyID);
+        Assert.Equal("abc", office.ContactNumber);
+
+        var payment = Assert.Single(payments);
+        Assert.Equal(101, payment.PaymentID);
+        Assert.Null(payment.Amount);
+        Assert.Equal(19.99m, payment.UnassignedAmount);
+    }
+
+    [Fact]
     public async Task Create_ReturnsResultId_FromEnvelope()
     {
         var (api, handler) = Create(_ => TestHelpers.JsonResponse("""{"success":true,"result":42}"""));
