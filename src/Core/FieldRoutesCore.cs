@@ -92,6 +92,32 @@ internal sealed class FieldRoutesCore
         _ => false,
     };
 
+    /// <summary>
+    /// Deserialize with tolerant options; on JsonException rethrow as a
+    /// FieldRoutesApiException that names the entity/action and the exact JSON
+    /// property path so a real-data type mismatch is immediately diagnosable.
+    /// </summary>
+    /// <remarks>
+    /// MANUAL FIX (2026-08-05): a live bulk get failed with a bare JsonException
+    /// ("Cannot get the value of a token type 'StartArray' as a string") that gave
+    /// no entity or property context. Wrapping here means the NEXT real-data
+    /// mismatch reports e.g. "Failed to deserialize appointment/get: ... Path:
+    /// $[0].additionalTechs". The wire-cased property name appears in Path
+    /// (JsonException.Path), not the C# property name.
+    /// </remarks>
+    private static T DeserializeSafe<T>(string entity, string action, JsonElement element, int status, string text)
+    {
+        try
+        {
+            return element.Deserialize<T>(FrJson.Options)!;
+        }
+        catch (JsonException ex)
+        {
+            throw new FieldRoutesApiException(status, text,
+                $"Failed to deserialize {entity}/{action}: {ex.Message} Path: {ex.Path ?? "(unknown)"}");
+        }
+    }
+
     /// <summary>POST an entity action and deserialize the result (envelope-aware).</summary>
     public async Task<T> PostAsync<T>(string entity, string action, IDictionary<string, object?>? parameters, CancellationToken ct)
     {
@@ -101,18 +127,24 @@ internal sealed class FieldRoutesCore
         var root = doc.RootElement;
         EnsureEnvelopeOk(status, text, root);
         if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("result", out var result))
-            return result.ValueKind == JsonValueKind.Null ? default! : result.Deserialize<T>(FrJson.Options)!;
+            return result.ValueKind == JsonValueKind.Null ? default! : DeserializeSafe<T>(entity, action, result, status, text);
         // Some get endpoints (e.g. office/get) return the records under a plural key
         // ({success, offices:[...]}) instead of the result envelope. Mirrors the official
         // client's response[type + 's'] unwrap. Only applies when a list is expected.
+        // MANUAL FIX (2026-08-05): documented here because it deviates from the api.md
+        // envelope shape — always check both shapes when adding a new bulk get path.
         if (root.ValueKind == JsonValueKind.Object
             && typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>)
             && root.TryGetProperty(entity + "s", out var plural) && plural.ValueKind == JsonValueKind.Array)
-            return plural.Deserialize<T>(FrJson.Options)!;
-        return root.Deserialize<T>(FrJson.Options)!;
+            return DeserializeSafe<T>(entity, action, plural, status, text);
+        return DeserializeSafe<T>(entity, action, root, status, text);
     }
 
-    /// <summary>POST a search and parse the dynamic-key search response.</summary>
+    /// <summary>
+    /// POST a search and parse the dynamic-key search response. Accepts every
+    /// envelope shape FieldRoutes emits in the wild (meta keys at the root, or
+    /// wrapped under <c>result</c> with or without meta keys).
+    /// </summary>
     public async Task<SearchResponse<T>> PostSearchAsync<T>(string entity, IDictionary<string, object?>? parameters, CancellationToken ct)
     {
         var (status, text) = await SendAsync(_http, Path(entity, "search"), BuildBody(parameters), ct).ConfigureAwait(false);
@@ -121,44 +153,52 @@ internal sealed class FieldRoutesCore
         var root = doc.RootElement;
         EnsureEnvelopeOk(status, text, root);
 
-        if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("result", out var result)
+        // FieldRoutes is inconsistent about where the search payload lives:
+        //   a) meta keys at the envelope root: {"success":true,"idName":"customerIDs","customerIDs":[...],...}
+        //   b) payload wrapped under "result" WITH meta keys:
+        //      {"success":true,"result":{"idName":"routeIDs","propertyName":"routes","routeIDs":[...],"routes":[...]}}
+        //   c) payload wrapped under "result" WITHOUT meta keys: {"success":true,"result":{"routeIDs":[...]}}
+        // MANUAL FIX (2026-08-05): previously we only descended into "result" when it had NO
+        // idName (shape c), so the real shape (b) was parsed against the outer envelope and
+        // returned empty IDs — Routes.SearchAsync showed zero routes while offices parsed fine.
+        // Parse all three from a single chosen payload root; the existing fallbacks
+        // (FirstKeyEndingWith, propertyName candidates, NoDataExported) then operate on it.
+        var payload = root.ValueKind == JsonValueKind.Object
+            && root.TryGetProperty("result", out var result)
             && result.ValueKind == JsonValueKind.Object
-            && !result.TryGetProperty("idName", out _))
-        {
-            // some responses nest the search payload under "result" without meta at root
-            root = result;
-        }
+                ? result
+                : root;
 
-        var idName = GetString(root, "idName")
-            ?? FirstKeyEndingWith(root, "IDs", exclude: "NoDataExported");
-        var propertyName = GetString(root, "propertyName");
-        var propertyNameData = GetString(root, "propertyNameData");
+        var idName = GetString(payload, "idName")
+            ?? FirstKeyEndingWith(payload, "IDs", exclude: "NoDataExported");
+        var propertyName = GetString(payload, "propertyName");
+        var propertyNameData = GetString(payload, "propertyNameData");
 
         var ids = new List<int>();
-        if (idName is not null && root.TryGetProperty(idName, out var idEl) && idEl.ValueKind == JsonValueKind.Array)
-            ids = idEl.Deserialize<List<int>>(FrJson.Options) ?? new List<int>();
+        if (idName is not null && payload.TryGetProperty(idName, out var idEl) && idEl.ValueKind == JsonValueKind.Array)
+            ids = DeserializeSafe<List<int>>(entity, "search", idEl, status, text) ?? new List<int>();
 
         List<T>? data = null;
         foreach (var candidate in new[] { propertyNameData, propertyName })
         {
             if (candidate is null || candidate == idName) continue;
-            if (root.TryGetProperty(candidate, out var dataEl) && dataEl.ValueKind == JsonValueKind.Array)
+            if (payload.TryGetProperty(candidate, out var dataEl) && dataEl.ValueKind == JsonValueKind.Array)
             {
-                data = dataEl.Deserialize<List<T>>(FrJson.Options);
+                data = DeserializeSafe<List<T>>(entity, "search", dataEl, status, text);
                 break;
             }
         }
 
         List<int>? noData = null;
-        if (idName is not null && root.TryGetProperty(idName + "NoDataExported", out var ndEl) && ndEl.ValueKind == JsonValueKind.Array)
-            noData = ndEl.Deserialize<List<int>>(FrJson.Options);
+        if (idName is not null && payload.TryGetProperty(idName + "NoDataExported", out var ndEl) && ndEl.ValueKind == JsonValueKind.Array)
+            noData = DeserializeSafe<List<int>>(entity, "search", ndEl, status, text);
 
         return new SearchResponse<T>
         {
             IDs = ids,
             Data = data,
             IDsNoDataExported = noData,
-            Count = GetInt(root, "count") ?? ids.Count,
+            Count = GetInt(payload, "count") ?? ids.Count,
             IdName = idName,
             PropertyName = propertyName,
             PropertyNameData = propertyNameData,

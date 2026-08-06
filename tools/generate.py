@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+# ============================================================================
+# DEPRECATED — DO NOT RUN.
+#
+# Models in src/Entities/Models/ are now MANUALLY MAINTAINED. Running this
+# script wipes src/Entities/ and would silently revert every manual type fix
+# (see the // MANUAL FIX comments in the models). Never run it, never call it
+# from a build/CI step. api.md is reference-only from now on.
+#
+# Retained purely as historical record of how the models were originally
+# derived from api.md. See AGENTS.md for the current policy.
+# ============================================================================
 """Generate C# entity code (models, requests, search params, clients) from api.md.
 
 Output: src/Entities/*.cs and src/Core/GeneratedFieldRoutesApi.cs (facade).
@@ -19,6 +30,44 @@ ENDPOINT_RE = re.compile(r"^###\s+`/([^/]+)/(.+?)`$")
 
 SKIP_PARAM_NAMES = {"authenticationKey", "authenticationToken"}
 
+# DEPRECATED (see banner at top): this script must not be run. MODEL_TYPE_FIXUPS
+# exists only so that IF the script were ever executed, the hand-applied type
+# fixes (documented as // MANUAL FIX comments in the models) would survive
+# instead of being silently reverted to api.md's (wrong) types. Models are
+# hand-maintained; api.md is reference-only. See AGENTS.md.
+# FieldRoutes api.md declares some response fields with the wrong type
+# (e.g. `email` | integer) or with an ambiguous type (arrays documented only
+# in the description). The live API returns strings/arrays for these, so the
+# generated models pin the real wire type here. Keyed by (entity, field).
+MODEL_TYPE_FIXUPS = {
+    ("route", "title"): "string",
+    ("route", "groupTitle"): "string",
+    ("route", "dayNotes"): "string",
+    ("route", "additionalTechs"): "int[]",
+    ("route", "scheduleTeams"): "int[]",
+    ("route", "scheduleTypes"): "int[]",
+    ("employee", "email"): "string",
+    ("employee", "skillIDs"): "int[]",
+    ("employee", "skillDescriptions"): "string[]",
+    ("employee", "regionalManagerOfficeIDs"): "int[]",
+    ("customer", "subscriptionIDs"): "int[]",
+    ("customer", "appointmentIDs"): "int[]",
+    ("customer", "ticketIDs"): "int[]",
+    ("customer", "paymentIDs"): "int[]",
+    ("customer", "unitIDs"): "int[]",
+    ("appointment", "additionalTechs"): "int[]",
+    ("appointment", "unitIDs"): "int[]",
+    ("payment", "invoiceIDs"): "int[]",
+    ("payment", "paymentApplications"): "List<object>",
+    ("ticket", "items"): "List<object>",
+    ("servicePlan", "completedAppointmentIDs"): "int[]",
+    ("servicePlan", "addOns"): "List<object>",
+    ("subscription", "completedAppointmentIDs"): "int[]",
+    ("subscription", "addOns"): "List<object>",
+    ("servicePlanRound", "completedAppointmentIDs"): "int[]",
+    ("servicePlanRound", "addOns"): "List<object>",
+}
+
 def snake(name: str) -> str:
     """appointmentID -> appointment_id (roughly, for var naming only)."""
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
@@ -37,7 +86,12 @@ def plural(name: str) -> str:
 def cs_escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace("\"", "\\\"").replace("`", "")
 
-def cs_type(field_name: str, typ: str, desc: str, nullable: bool = True, model: bool = False):
+def cs_type(field_name: str, typ: str, desc: str, nullable: bool = True, model: bool = False, override: str | None = None):
+    if override is not None:
+        base = override
+        if base == "string":
+            return "string" if not nullable else "string?"
+        return base + ("?" if nullable else "")
     t = (typ or "").strip().lower()
     d = desc.lower()
     if model and "array" in d:
@@ -141,14 +195,14 @@ def render_comment(field, indent):
         return None
     return f"{indent}/// <summary>{desc}</summary>"
 
-def render_model(name, fields):
+def render_model(entity, name, fields):
     lines = [f"/// <summary>{name} record as returned by the FieldRoutes API.</summary>",
              f"public sealed class {name}", "{"]
     for f in fields:
         c = render_comment(f, "    ")
         if c:
             lines.append(c)
-        lines.append(f"    public {cs_type(f.name, f.typ, f.desc, model=True)} {pascal(f.name)} {{ get; set; }}")
+        lines.append(f"    public {cs_type(f.name, f.typ, f.desc, model=True, override=MODEL_TYPE_FIXUPS.get((entity, f.name)))} {pascal(f.name)} {{ get; set; }}")
     lines.append("}")
     return "\n".join(lines)
 
@@ -307,7 +361,7 @@ def main():
         p = pfx(entity)
 
         # model
-        emit("Models", f"{p}", render_model(f"{p}", model_fields))
+        emit("Models", f"{p}", render_model(entity, f"{p}", model_fields))
         # request classes for create/update/actions and get parameters
         for ep in eps:
             action = ep.action
@@ -324,7 +378,7 @@ def main():
                 if ep.params:
                     emit("Requests", f"{p}{pascal(action)}Request", render_request(f"{p}{pascal(action)}Request", ep.params))
                 if ep.response:
-                    emit("Results", f"{p}{pascal(action)}Result", render_model(f"{p}{pascal(action)}Result", ep.response))
+                    emit("Results", f"{p}{pascal(action)}Result", render_model(entity, f"{p}{pascal(action)}Result", ep.response))
         # client
         emit("Clients", f"{plural(pascal(entity))}Client", render_client(entity, eps))
 

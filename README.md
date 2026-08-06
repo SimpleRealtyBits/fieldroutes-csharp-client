@@ -1,6 +1,6 @@
 # FieldRoutesApiClient
 
-Typed .NET 10 client for the [FieldRoutes](https://fieldroutes.com) (PestRoutes) API, generated from the official API reference. Every entity, endpoint, parameter, and response field in the current API docs is covered.
+Typed .NET 10 client for the [FieldRoutes](https://fieldroutes.com) (PestRoutes) API. The entity surface was originally derived from the official API reference (`api.md`) and is now **hand-maintained** — `api.md` is reference-only and is never regenerated from. See `AGENTS.md` for the maintenance policy. Every entity, endpoint, parameter, and response field in the current API docs is covered.
 
 Credentials are supplied per client instance, so one process can talk to any number of FieldRoutes accounts (each with its own subdomain and API key pair) without restarting or reconfiguration. Clients are created at runtime via `IFieldRoutesClientFactory`; nothing is bound at startup.
 
@@ -111,7 +111,7 @@ var api = new FieldRoutesApi(new FieldRoutesOptions
 
 ## API surface
 
-Every entity in the API docs has several generated pieces. Data types (models, requests, search parameters, results) are prefixed `FieldRoutes` so they coexist with your own domain models (`Customer` vs `FieldRoutesCustomer`). Clients use the plain plural entity name.
+Every entity in the API docs has several pieces. Data types (models, requests, search parameters, results) are prefixed `FieldRoutes` so they coexist with your own domain models (`Customer` vs `FieldRoutesCustomer`). Clients use the plain plural entity name.
 
 | Piece | Example | Location |
 |---|---|---|
@@ -124,7 +124,7 @@ Every entity in the API docs has several generated pieces. Data types (models, r
 
 The facade exposes one property per entity: `api.Customers`, `api.Appointments`, `api.Spots`, `api.ServicePlans`, and 52 more.
 
-Every generated method takes an optional `CancellationToken ct = default` (omitted from examples below for brevity).
+Every client method takes an optional `CancellationToken ct = default` (omitted from examples below for brevity).
 
 ## Examples
 
@@ -291,8 +291,8 @@ Note: do not log request bodies; they contain the account's authentication key a
 ## Project structure
 
 ```
-api.md                                   # official API reference (regeneration source)
-tools/generate.py                        # code generator: api.md -> src/Entities
+api.md                                   # official API reference (reference-only — see AGENTS.md)
+tools/generate.py                        # DEPRECATED code generator (do not run — see AGENTS.md)
 src/Core/
   FieldRoutesApi.cs                      # facade: 56 entity client properties
   FieldRoutesApi.Partial.cs              # constructors
@@ -312,16 +312,16 @@ src/Entities/
 tests/FieldRoutesApiClient.Tests/        # xunit smoke tests (fake HTTP handler)
 ```
 
-## Regenerating from api.md
+## Model maintenance
 
-All entity code is generated. After the API reference changes:
+Models are **hand-maintained**. `api.md` is reference material only — do not regenerate from it, and never run `tools/generate.py` (it is deprecated and would wipe `src/Entities/`, reverting all manual type fixes).
+
+When a field deviates from api.md (or from the obvious wire type), the model carries a `// MANUAL FIX (YYYY-MM-DD):` comment noting what was wrong, the evidence, and the date — so anyone reading a model file can see exactly which fields differ from the docs and why. Full policy, the new-field workflow, and the documentation requirements live in `AGENTS.md`.
 
 ```sh
-python3 tools/generate.py
-dotnet build
+dotnet build                                   # 0 errors
+dotnet test tests/FieldRoutesApiClient.Tests/  # all tests pass
 ```
-
-The generator wipes `src/Entities/` and rewrites all ~270 files. Hand-written code lives only in `src/Core/` and is untouched. The generator already works around known quirks in the official docs (garbage rows like `compassCustomer/search` params `1`,`2`; non-standard types `int`/`bool`; typo'd parameter names are preserved verbatim because the live API expects them).
 
 ## Known limitations
 

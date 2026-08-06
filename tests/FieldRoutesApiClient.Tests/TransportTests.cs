@@ -130,6 +130,53 @@ public sealed class TransportTests
     }
 
     [Fact]
+    public async Task Search_WrappedResultWithMeta_ParsesIds()
+    {
+        // Real FieldRoutes search shape: payload wrapped under "result" WITH meta keys.
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":{"idName":"routeIDs","routeIDs":[1,2],"propertyName":"routes","count":2}}
+            """));
+
+        var result = await api.Routes.SearchAsync(new FieldRoutesRouteSearchParameters());
+
+        Assert.Equal([1, 2], result.IDs);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("routeIDs", result.IdName);
+        Assert.Equal("routes", result.PropertyName);
+    }
+
+    [Fact]
+    public async Task Search_WrappedResultWithMetaAndData_ParsesData()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":{"idName":"routeIDs","routeIDs":[42],"propertyName":"routes","routes":[{"routeID":42,"title":"A"}],"count":1}}
+            """));
+
+        var result = await api.Routes.SearchAsync(new FieldRoutesRouteSearchParameters());
+
+        Assert.Equal([42], result.IDs);
+        Assert.Equal(1, result.Count);
+        var route = Assert.Single(result.Data!);
+        Assert.Equal(42, route.RouteID);
+        Assert.Equal("A", route.Title);
+    }
+
+    [Fact]
+    public async Task Search_WrappedResultWithoutIdName_FallsBackToFirstKeyEndingWith()
+    {
+        // Nested payload without meta keys: idName must be derived from the inner root.
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":{"routeIDs":[7]}}
+            """));
+
+        var result = await api.Routes.SearchAsync(new FieldRoutesRouteSearchParameters());
+
+        Assert.Equal([7], result.IDs);
+        Assert.Equal(1, result.Count);
+        Assert.Equal("routeIDs", result.IdName);
+    }
+
+    [Fact]
     public async Task GetBulk_ParsesEnvelopeResultArray()
     {
         var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
