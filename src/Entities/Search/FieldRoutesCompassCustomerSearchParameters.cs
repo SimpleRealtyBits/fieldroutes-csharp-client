@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesCompassCustomerSearchParameters
+public sealed class FieldRoutesCompassCustomerSearchParameters : FieldRoutesQueryBase
 {
 
     /// <summary>Fields supporting query objects, e.g. { "operator": ">", "value": "2016-01-01" }.</summary>

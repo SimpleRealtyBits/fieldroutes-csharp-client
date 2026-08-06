@@ -19,15 +19,15 @@ public sealed class DoorsClient
     public Task<FieldRoutesDoor> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesDoor>("door", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesDoor>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesDoor>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["doorIDs"] = ids.ToList(),
+            ["doorIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesDoor>>("door", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesDoor>> SearchAsync(FieldRoutesDoorSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesDoor>("door", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesDoor>("door", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

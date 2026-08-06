@@ -19,15 +19,15 @@ public sealed class ApplicationMethodsClient
     public Task<FieldRoutesApplicationMethod> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesApplicationMethod>("applicationMethod", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesApplicationMethod>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesApplicationMethod>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["applciationMethodIDs"] = ids.ToList(),
+            ["applciationMethodIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesApplicationMethod>>("applicationMethod", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesApplicationMethod>> SearchAsync(FieldRoutesApplicationMethodSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesApplicationMethod>("applicationMethod", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesApplicationMethod>("applicationMethod", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesKnockSearchParameters
+public sealed class FieldRoutesKnockSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary Key</summary>
     public int? KnockID { get; set; }

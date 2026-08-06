@@ -19,15 +19,15 @@ public sealed class AccessControlsClient
     public Task<FieldRoutesAccessControl> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesAccessControl>("accessControl", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesAccessControl>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesAccessControl>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["employeeIDs"] = ids.ToList(),
+            ["employeeIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesAccessControl>>("accessControl", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesAccessControl>> SearchAsync(FieldRoutesAccessControlSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesAccessControl>("accessControl", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesAccessControl>("accessControl", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

@@ -25,16 +25,16 @@ public sealed class GenericFlagAssignmentsClient
     public Task<int> DeleteAsync(FieldRoutesGenericFlagAssignmentDeleteRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("genericFlagAssignment", "delete", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesGenericFlagAssignment>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesGenericFlagAssignment>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["genericFlagAssignmentIDs"] = ids.ToList(),
+            ["genericFlagAssignmentIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesGenericFlagAssignment>>("genericFlagAssignment", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesGenericFlagAssignment>> SearchAsync(FieldRoutesGenericFlagAssignmentSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesGenericFlagAssignment>("genericFlagAssignment", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesGenericFlagAssignment>("genericFlagAssignment", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesGenericFlagAssignmentUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("genericFlagAssignment", "update", request.ToDictionary(), ct);

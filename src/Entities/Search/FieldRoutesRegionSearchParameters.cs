@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesRegionSearchParameters
+public sealed class FieldRoutesRegionSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? RegionIDs { get; set; }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesPaymentSearchParameters
+public sealed class FieldRoutesPaymentSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Office Unique Identifier</summary>
     public int? OfficeIDs { get; set; }

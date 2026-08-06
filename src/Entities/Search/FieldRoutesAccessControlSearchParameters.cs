@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAccessControlSearchParameters
+public sealed class FieldRoutesAccessControlSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? EmployeeID { get; set; }

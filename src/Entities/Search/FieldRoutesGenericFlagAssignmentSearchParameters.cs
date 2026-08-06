@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesGenericFlagAssignmentSearchParameters
+public sealed class FieldRoutesGenericFlagAssignmentSearchParameters : FieldRoutesQueryBase
 {
     public int? GenericFlagAssignmentIDs { get; set; }
     public int? GenericFlagIDs { get; set; }

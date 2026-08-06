@@ -28,7 +28,7 @@ public sealed class ReviewsClient
     public Task<List<FieldRoutesReview>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesReviewGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["feedbackIDs"] = ids.ToList(),
+            ["feedbackIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -36,7 +36,7 @@ public sealed class ReviewsClient
     }
 
     public Task<SearchResponse<FieldRoutesReview>> SearchAsync(FieldRoutesReviewSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesReview>("review", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesReview>("review", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<FieldRoutesReviewSummaryResult> SummaryAsync(FieldRoutesReviewSummaryRequest request, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesReviewSummaryResult>("review", "summary", request.ToDictionary(), ct);

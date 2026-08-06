@@ -145,7 +145,8 @@ internal sealed class FieldRoutesCore
     /// envelope shape FieldRoutes emits in the wild (meta keys at the root, or
     /// wrapped under <c>result</c> with or without meta keys).
     /// </summary>
-    public async Task<SearchResponse<T>> PostSearchAsync<T>(string entity, IDictionary<string, object?>? parameters, CancellationToken ct)
+    /// <summary>POST a search and parse the dynamic-key search response, trimming IDs to <paramref name="maxResults"/>.</summary>
+    public async Task<SearchResponse<T>> PostSearchAsync<T>(string entity, IDictionary<string, object?>? parameters, int maxResults, CancellationToken ct)
     {
         var (status, text) = await SendAsync(_http, Path(entity, "search"), BuildBody(parameters), ct).ConfigureAwait(false);
         EnsureSuccess(status, text);
@@ -177,6 +178,10 @@ internal sealed class FieldRoutesCore
         var ids = new List<int>();
         if (idName is not null && payload.TryGetProperty(idName, out var idEl) && idEl.ValueKind == JsonValueKind.Array)
             ids = DeserializeSafe<List<int>>(entity, "search", idEl, status, text) ?? new List<int>();
+
+        // Client-side guard: trim IDs before any downstream work to prevent unbounded result sets.
+        if (ids.Count > maxResults)
+            ids = ids.Take(maxResults).ToList();
 
         List<T>? data = null;
         foreach (var candidate in new[] { propertyNameData, propertyName })

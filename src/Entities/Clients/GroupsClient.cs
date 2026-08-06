@@ -22,16 +22,16 @@ public sealed class GroupsClient
     public Task<int> CreateAsync(FieldRoutesGroupCreateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("group", "create", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesGroup>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesGroup>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["groupIDs"] = ids.ToList(),
+            ["groupIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesGroup>>("group", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesGroup>> SearchAsync(FieldRoutesGroupSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesGroup>("group", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesGroup>("group", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesGroupUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("group", "update", request.ToDictionary(), ct);

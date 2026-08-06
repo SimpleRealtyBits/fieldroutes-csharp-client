@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesTeamSearchParameters
+public sealed class FieldRoutesTeamSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Unique Identifier</summary>
     public int? TeamID { get; set; }

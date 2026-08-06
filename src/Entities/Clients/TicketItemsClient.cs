@@ -19,15 +19,15 @@ public sealed class TicketItemsClient
     public Task<FieldRoutesTicketItem> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesTicketItem>("ticketItem", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesTicketItem>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesTicketItem>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["itemIDs"] = ids.ToList(),
+            ["itemIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesTicketItem>>("ticketItem", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesTicketItem>> SearchAsync(FieldRoutesTicketItemSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesTicketItem>("ticketItem", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesTicketItem>("ticketItem", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

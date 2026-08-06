@@ -19,15 +19,15 @@ public sealed class AppointmentCancellationReasonsClient
     public Task<FieldRoutesAppointmentCancellationReason> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesAppointmentCancellationReason>("appointmentCancellationReason", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesAppointmentCancellationReason>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesAppointmentCancellationReason>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["cancellationReasonIDs"] = ids.ToList(),
+            ["cancellationReasonIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesAppointmentCancellationReason>>("appointmentCancellationReason", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesAppointmentCancellationReason>> SearchAsync(FieldRoutesAppointmentCancellationReasonSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesAppointmentCancellationReason>("appointmentCancellationReason", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesAppointmentCancellationReason>("appointmentCancellationReason", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

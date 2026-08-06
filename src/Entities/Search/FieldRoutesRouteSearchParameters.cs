@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesRouteSearchParameters
+public sealed class FieldRoutesRouteSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     public int? RouteIDs { get; set; }

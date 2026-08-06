@@ -19,15 +19,15 @@ public sealed class CustomerSourcesClient
     public Task<FieldRoutesCustomerSource> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesCustomerSource>("customerSource", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesCustomerSource>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesCustomerSource>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["sourceIDs"] = ids.ToList(),
+            ["sourceIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesCustomerSource>>("customerSource", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesCustomerSource>> SearchAsync(FieldRoutesCustomerSourceSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesCustomerSource>("customerSource", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesCustomerSource>("customerSource", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

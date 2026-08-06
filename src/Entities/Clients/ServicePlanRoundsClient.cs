@@ -19,16 +19,16 @@ public sealed class ServicePlanRoundsClient
     public Task<FieldRoutesServicePlanRound> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesServicePlanRound>("servicePlanRound", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesServicePlanRound>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesServicePlanRound>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["subscriptionIDs"] = ids.ToList(),
+            ["subscriptionIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesServicePlanRound>>("servicePlanRound", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesServicePlanRound>> SearchAsync(FieldRoutesServicePlanRoundSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesServicePlanRound>("servicePlanRound", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesServicePlanRound>("servicePlanRound", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesServicePlanRoundUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("servicePlanRound", "update", request.ToDictionary(), ct);

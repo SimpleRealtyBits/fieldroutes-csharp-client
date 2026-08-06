@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesTaskSearchParameters
+public sealed class FieldRoutesTaskSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key.</summary>
     public int? TaskIDs { get; set; }

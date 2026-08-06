@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesChargebackSearchParameters
+public sealed class FieldRoutesChargebackSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? GatewayChargebackIDs { get; set; }

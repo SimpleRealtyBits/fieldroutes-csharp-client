@@ -19,15 +19,15 @@ public sealed class ChargebacksClient
     public Task<FieldRoutesChargeback> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesChargeback>("chargeback", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesChargeback>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesChargeback>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["gatewayChargebackIDs"] = ids.ToList(),
+            ["gatewayChargebackIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesChargeback>>("chargeback", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesChargeback>> SearchAsync(FieldRoutesChargebackSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesChargeback>("chargeback", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesChargeback>("chargeback", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

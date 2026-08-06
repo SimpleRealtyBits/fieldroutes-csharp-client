@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesChemicalSearchParameters
+public sealed class FieldRoutesChemicalSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? ChemicalIDs { get; set; }

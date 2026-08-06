@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesEmployeeGetBulkParameters
+public sealed class FieldRoutesEmployeeGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Send as 1 to retrieve additional commission data for the employee.</summary>
     public int? IncludeCommissionData { get; set; }

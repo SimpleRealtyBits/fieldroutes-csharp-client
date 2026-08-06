@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesDocumentSearchParameters
+public sealed class FieldRoutesDocumentSearchParameters : FieldRoutesQueryBase
 {
     public int? UploadIDs { get; set; }
     public int? OfficeIDs { get; set; }

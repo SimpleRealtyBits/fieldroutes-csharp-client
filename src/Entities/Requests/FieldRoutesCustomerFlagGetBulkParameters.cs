@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesCustomerFlagGetBulkParameters
+public sealed class FieldRoutesCustomerFlagGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Standard search filter. E.G. \"limitCustomerFlags\": {\"operator\":\"IN\",\"value\":[\"myFlag\",\"yourflag\"}</summary>
     public string? LimitCustomerFlags { get; set; }

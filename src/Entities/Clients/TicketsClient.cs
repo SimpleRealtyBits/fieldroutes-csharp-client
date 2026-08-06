@@ -31,10 +31,10 @@ public sealed class TicketsClient
     public Task<int> DeleteAddOnAsync(FieldRoutesTicketDeleteAddOnRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("ticket", "deleteAddOn", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesTicket>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesTicket>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["ticketIDs"] = ids.ToList(),
+            ["ticketIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesTicket>>("ticket", "get", d, ct);
     }
@@ -43,7 +43,7 @@ public sealed class TicketsClient
         => _core.PostAsync<FieldRoutesTicketGetAddOnsResult>("ticket", "getAddOns", request.ToDictionary(), ct);
 
     public Task<SearchResponse<FieldRoutesTicket>> SearchAsync(FieldRoutesTicketSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesTicket>("ticket", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesTicket>("ticket", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> SetAddOnsAsync(FieldRoutesTicketSetAddOnsRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("ticket", "setAddOns", request.ToDictionary(), ct);

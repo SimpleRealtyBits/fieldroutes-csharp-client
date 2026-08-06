@@ -31,7 +31,7 @@ public sealed class AppointmentsClient
     public Task<List<FieldRoutesAppointment>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesAppointmentGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["appointmentIDs"] = ids.ToList(),
+            ["appointmentIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -39,7 +39,7 @@ public sealed class AppointmentsClient
     }
 
     public Task<SearchResponse<FieldRoutesAppointment>> SearchAsync(FieldRoutesAppointmentSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesAppointment>("appointment", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesAppointment>("appointment", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesAppointmentUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("appointment", "update", request.ToDictionary(), ct);

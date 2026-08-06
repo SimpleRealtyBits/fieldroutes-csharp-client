@@ -25,16 +25,16 @@ public sealed class PaymentProfilesClient
     public Task<int> DeleteAsync(FieldRoutesPaymentProfileDeleteRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("paymentProfile", "delete", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesPaymentProfile>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesPaymentProfile>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["paymentProfileIDs"] = ids.ToList(),
+            ["paymentProfileIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesPaymentProfile>>("paymentProfile", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesPaymentProfile>> SearchAsync(FieldRoutesPaymentProfileSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesPaymentProfile>("paymentProfile", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesPaymentProfile>("paymentProfile", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesPaymentProfileUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("paymentProfile", "update", request.ToDictionary(), ct);

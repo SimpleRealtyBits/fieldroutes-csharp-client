@@ -19,15 +19,15 @@ public sealed class CompassCustomersClient
     public Task<FieldRoutesCompassCustomer> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesCompassCustomer>("compassCustomer", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesCompassCustomer>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesCompassCustomer>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["customerIDs"] = ids.ToList(),
+            ["customerIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesCompassCustomer>>("compassCustomer", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesCompassCustomer>> SearchAsync(FieldRoutesCompassCustomerSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesCompassCustomer>("compassCustomer", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesCompassCustomer>("compassCustomer", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

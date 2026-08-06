@@ -19,15 +19,15 @@ public sealed class ChangelogsClient
     public Task<FieldRoutesChangelog> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesChangelog>("changelog", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesChangelog>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesChangelog>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["changeIDs"] = ids.ToList(),
+            ["changeIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesChangelog>>("changelog", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesChangelog>> SearchAsync(FieldRoutesChangelogSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesChangelog>("changelog", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesChangelog>("changelog", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

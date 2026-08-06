@@ -19,15 +19,15 @@ public sealed class KnocksClient
     public Task<FieldRoutesKnock> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesKnock>("knock", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesKnock>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesKnock>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["knockIDs"] = ids.ToList(),
+            ["knockIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesKnock>>("knock", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesKnock>> SearchAsync(FieldRoutesKnockSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesKnock>("knock", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesKnock>("knock", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

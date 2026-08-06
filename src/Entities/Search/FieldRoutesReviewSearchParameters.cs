@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesReviewSearchParameters
+public sealed class FieldRoutesReviewSearchParameters : FieldRoutesQueryBase
 {
     public int? FeedbackIDs { get; set; }
     public int? OfficeIDs { get; set; }

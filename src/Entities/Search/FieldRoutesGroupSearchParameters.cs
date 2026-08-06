@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesGroupSearchParameters
+public sealed class FieldRoutesGroupSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? GroupIDs { get; set; }

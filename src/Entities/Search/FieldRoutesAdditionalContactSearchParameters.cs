@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAdditionalContactSearchParameters
+public sealed class FieldRoutesAdditionalContactSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary Key</summary>
     public int? AdditionalContactIDs { get; set; }

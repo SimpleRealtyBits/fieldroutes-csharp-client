@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesGenericFlagSearchParameters
+public sealed class FieldRoutesGenericFlagSearchParameters : FieldRoutesQueryBase
 {
     public int? GenericFlagIDs { get; set; }
     public int? OfficeIDs { get; set; }

@@ -25,15 +25,15 @@ public sealed class PaymentsClient
     public Task<int> CreateRefundAsync(FieldRoutesPaymentCreateRefundRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("payment", "createRefund", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesPayment>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesPayment>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["paymentIDs"] = ids.ToList(),
+            ["paymentIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesPayment>>("payment", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesPayment>> SearchAsync(FieldRoutesPaymentSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesPayment>("payment", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesPayment>("payment", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

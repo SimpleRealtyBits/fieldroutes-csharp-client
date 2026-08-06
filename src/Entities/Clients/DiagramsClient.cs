@@ -19,16 +19,16 @@ public sealed class DiagramsClient
     public Task<FieldRoutesDiagram> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesDiagram>("diagram", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesDiagram>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesDiagram>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["diagramIDs"] = ids.ToList(),
+            ["diagramIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesDiagram>>("diagram", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesDiagram>> SearchAsync(FieldRoutesDiagramSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesDiagram>("diagram", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesDiagram>("diagram", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesDiagramUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("diagram", "update", request.ToDictionary(), ct);

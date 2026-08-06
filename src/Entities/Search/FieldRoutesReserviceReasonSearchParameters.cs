@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesReserviceReasonSearchParameters
+public sealed class FieldRoutesReserviceReasonSearchParameters : FieldRoutesQueryBase
 {
     public int? ReserviceReasonIDs { get; set; }
     public int? ReserviceReasonID { get; set; }

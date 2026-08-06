@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesGlAccountSearchParameters
+public sealed class FieldRoutesGlAccountSearchParameters : FieldRoutesQueryBase
 {
     public int? GlAccountIDs { get; set; }
     public int? GlAccountID { get; set; }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesDoorSearchParameters
+public sealed class FieldRoutesDoorSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>doorID</summary>
     public int? DoorID { get; set; }

@@ -22,15 +22,15 @@ public sealed class AdditionalContactsClient
     public Task<int> CreateAsync(FieldRoutesAdditionalContactCreateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("additionalContact", "create", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesAdditionalContact>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesAdditionalContact>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["additionalContactIDs"] = ids.ToList(),
+            ["additionalContactIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesAdditionalContact>>("additionalContact", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesAdditionalContact>> SearchAsync(FieldRoutesAdditionalContactSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesAdditionalContact>("additionalContact", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesAdditionalContact>("additionalContact", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

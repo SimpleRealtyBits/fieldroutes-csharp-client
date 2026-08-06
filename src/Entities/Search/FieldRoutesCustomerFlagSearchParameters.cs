@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesCustomerFlagSearchParameters
+public sealed class FieldRoutesCustomerFlagSearchParameters : FieldRoutesQueryBase
 {
     public int? CustomerIDs { get; set; }
     /// <summary>Limit using user-defined generic flags or system flags: paidInFull, switchOver, purpleDragon, pendingCancellation, prefersPaper, collectonsStage</summary>

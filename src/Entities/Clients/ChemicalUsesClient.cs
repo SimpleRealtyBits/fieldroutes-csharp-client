@@ -19,15 +19,15 @@ public sealed class ChemicalUsesClient
     public Task<FieldRoutesChemicalUse> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesChemicalUse>("chemicalUse", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesChemicalUse>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesChemicalUse>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["chemicalUseIDs"] = ids.ToList(),
+            ["chemicalUseIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesChemicalUse>>("chemicalUse", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesChemicalUse>> SearchAsync(FieldRoutesChemicalUseSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesChemicalUse>("chemicalUse", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesChemicalUse>("chemicalUse", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

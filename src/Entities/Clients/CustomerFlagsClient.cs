@@ -22,7 +22,7 @@ public sealed class CustomerFlagsClient
     public Task<List<FieldRoutesCustomerFlag>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesCustomerFlagGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["customerIDs"] = ids.ToList(),
+            ["customerIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -30,7 +30,7 @@ public sealed class CustomerFlagsClient
     }
 
     public Task<SearchResponse<FieldRoutesCustomerFlag>> SearchAsync(FieldRoutesCustomerFlagSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesCustomerFlag>("customerFlag", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesCustomerFlag>("customerFlag", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesCustomerFlagUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("customerFlag", "update", request.ToDictionary(), ct);

@@ -19,15 +19,15 @@ public sealed class ReserviceReasonsClient
     public Task<FieldRoutesReserviceReason> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesReserviceReason>("reserviceReason", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesReserviceReason>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesReserviceReason>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["reserviceReasonIDs"] = ids.ToList(),
+            ["reserviceReasonIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesReserviceReason>>("reserviceReason", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesReserviceReason>> SearchAsync(FieldRoutesReserviceReasonSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesReserviceReason>("reserviceReason", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesReserviceReason>("reserviceReason", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

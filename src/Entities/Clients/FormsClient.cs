@@ -22,7 +22,7 @@ public sealed class FormsClient
     public Task<List<FieldRoutesForm>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesFormGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["contractIDs"] = ids.ToList(),
+            ["contractIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -30,6 +30,6 @@ public sealed class FormsClient
     }
 
     public Task<SearchResponse<FieldRoutesForm>> SearchAsync(FieldRoutesFormSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesForm>("form", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesForm>("form", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

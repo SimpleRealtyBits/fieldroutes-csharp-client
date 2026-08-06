@@ -19,15 +19,15 @@ public sealed class EmployeeLocationsClient
     public Task<FieldRoutesEmployeeLocation> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesEmployeeLocation>("employeeLocation", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesEmployeeLocation>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesEmployeeLocation>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["locationIDs"] = ids.ToList(),
+            ["locationIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesEmployeeLocation>>("employeeLocation", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesEmployeeLocation>> SearchAsync(FieldRoutesEmployeeLocationSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesEmployeeLocation>("employeeLocation", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesEmployeeLocation>("employeeLocation", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

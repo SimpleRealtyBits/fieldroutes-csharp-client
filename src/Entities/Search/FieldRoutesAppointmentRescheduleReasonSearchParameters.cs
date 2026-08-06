@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAppointmentRescheduleReasonSearchParameters
+public sealed class FieldRoutesAppointmentRescheduleReasonSearchParameters : FieldRoutesQueryBase
 {
     public int? RescheduleReasonIDs { get; set; }
     public int? RescheduleReasonID { get; set; }

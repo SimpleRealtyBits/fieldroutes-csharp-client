@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesReviewGetBulkParameters
+public sealed class FieldRoutesReviewGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Set true to include the Customer object in review results..</summary>
     public int? IncludeCustomers { get; set; }

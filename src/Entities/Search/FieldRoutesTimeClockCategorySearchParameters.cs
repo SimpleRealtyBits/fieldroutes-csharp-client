@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesTimeClockCategorySearchParameters
+public sealed class FieldRoutesTimeClockCategorySearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key.</summary>
     public int? ClockCategoryIDs { get; set; }

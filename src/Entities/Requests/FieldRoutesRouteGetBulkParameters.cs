@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesRouteGetBulkParameters
+public sealed class FieldRoutesRouteGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Latitude for distance calculcations. If not specified, the office longitude will be used</summary>
     public decimal? Latitude { get; set; }

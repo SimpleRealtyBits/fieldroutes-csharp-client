@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesContractSearchParameters
+public sealed class FieldRoutesContractSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     public int? ContractIDs { get; set; }

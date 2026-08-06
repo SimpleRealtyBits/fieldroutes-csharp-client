@@ -19,15 +19,15 @@ public sealed class RouteTemplatesClient
     public Task<FieldRoutesRouteTemplate> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesRouteTemplate>("routeTemplate", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesRouteTemplate>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesRouteTemplate>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["templateIDs"] = ids.ToList(),
+            ["templateIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesRouteTemplate>>("routeTemplate", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesRouteTemplate>> SearchAsync(FieldRoutesRouteTemplateSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesRouteTemplate>("routeTemplate", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesRouteTemplate>("routeTemplate", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

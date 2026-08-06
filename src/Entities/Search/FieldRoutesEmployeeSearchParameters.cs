@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesEmployeeSearchParameters
+public sealed class FieldRoutesEmployeeSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     /// <summary>'Active': 1 or 'Inactive': 0</summary>

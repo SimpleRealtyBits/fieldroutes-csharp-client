@@ -19,15 +19,15 @@ public sealed class GenericFlagsClient
     public Task<FieldRoutesGenericFlag> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesGenericFlag>("genericFlag", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesGenericFlag>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesGenericFlag>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["genericFlagIDs"] = ids.ToList(),
+            ["genericFlagIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesGenericFlag>>("genericFlag", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesGenericFlag>> SearchAsync(FieldRoutesGenericFlagSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesGenericFlag>("genericFlag", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesGenericFlag>("genericFlag", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

@@ -19,15 +19,15 @@ public sealed class RegionsClient
     public Task<FieldRoutesRegion> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesRegion>("region", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesRegion>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesRegion>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["regionIDs"] = ids.ToList(),
+            ["regionIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesRegion>>("region", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesRegion>> SearchAsync(FieldRoutesRegionSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesRegion>("region", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesRegion>("region", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

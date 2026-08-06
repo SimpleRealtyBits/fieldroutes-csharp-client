@@ -28,7 +28,7 @@ public sealed class EmployeesClient
     public Task<List<FieldRoutesEmployee>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesEmployeeGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["employeeIDs"] = ids.ToList(),
+            ["employeeIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -39,7 +39,7 @@ public sealed class EmployeesClient
         => _core.PostAsync<int>("employee", "reset", request.ToDictionary(), ct);
 
     public Task<SearchResponse<FieldRoutesEmployee>> SearchAsync(FieldRoutesEmployeeSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesEmployee>("employee", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesEmployee>("employee", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesEmployeeUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("employee", "update", request.ToDictionary(), ct);

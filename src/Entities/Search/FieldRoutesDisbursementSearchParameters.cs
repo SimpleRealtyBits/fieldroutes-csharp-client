@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesDisbursementSearchParameters
+public sealed class FieldRoutesDisbursementSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? GatewayDisbursementIDs { get; set; }

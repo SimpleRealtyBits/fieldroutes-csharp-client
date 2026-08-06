@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAppointmentCancellationReasonSearchParameters
+public sealed class FieldRoutesAppointmentCancellationReasonSearchParameters : FieldRoutesQueryBase
 {
     public int? CancellationReasonIDs { get; set; }
     public int? CancellationReasonID { get; set; }

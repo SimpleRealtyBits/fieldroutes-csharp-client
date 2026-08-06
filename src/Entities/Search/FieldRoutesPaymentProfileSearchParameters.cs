@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesPaymentProfileSearchParameters
+public sealed class FieldRoutesPaymentProfileSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key for the paymentProfile</summary>
     public int? PaymentProfileIDs { get; set; }

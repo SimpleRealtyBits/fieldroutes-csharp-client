@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAppointmentReminderSearchParameters
+public sealed class FieldRoutesAppointmentReminderSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary Key</summary>
     public int? ReminderID { get; set; }

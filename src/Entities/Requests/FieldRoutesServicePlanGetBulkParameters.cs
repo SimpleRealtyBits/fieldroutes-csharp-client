@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesServicePlanGetBulkParameters
+public sealed class FieldRoutesServicePlanGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Send as 1 to retrieve an array of cancellationNotes associated with the subscription.</summary>
     public int? IncludeCancellationReason { get; set; }

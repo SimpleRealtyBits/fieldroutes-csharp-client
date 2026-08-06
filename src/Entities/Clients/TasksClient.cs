@@ -22,16 +22,16 @@ public sealed class TasksClient
     public Task<int> CreateAsync(FieldRoutesTaskCreateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("task", "create", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesTask>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesTask>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["taskIDs"] = ids.ToList(),
+            ["taskIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesTask>>("task", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesTask>> SearchAsync(FieldRoutesTaskSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesTask>("task", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesTask>("task", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesTaskUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("task", "update", request.ToDictionary(), ct);

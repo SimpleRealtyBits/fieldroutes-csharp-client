@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesChangelogSearchParameters
+public sealed class FieldRoutesChangelogSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     public int? ClassID { get; set; }

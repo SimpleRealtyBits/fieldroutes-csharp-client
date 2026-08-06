@@ -19,15 +19,15 @@ public sealed class GlAccountsClient
     public Task<FieldRoutesGlAccount> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesGlAccount>("glAccount", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesGlAccount>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesGlAccount>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["glAccountIDs"] = ids.ToList(),
+            ["glAccountIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesGlAccount>>("glAccount", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesGlAccount>> SearchAsync(FieldRoutesGlAccountSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesGlAccount>("glAccount", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesGlAccount>("glAccount", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

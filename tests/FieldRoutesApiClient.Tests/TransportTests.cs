@@ -273,6 +273,91 @@ public sealed class TransportTests
         var body = await ReadBody(handler.Requests[1]);
         Assert.Equal(JsonSerializer.Serialize(new[] { 2, 3 }), body.GetProperty("spotIDs").GetRawText());
     }
+
+    [Fact]
+    public async Task Search_DefaultMaxResults_TrimsIdsTo100()
+    {
+        var manyIds = string.Join(",", Enumerable.Range(1, 200));
+        var (api, _) = Create(_ => TestHelpers.JsonResponse($$$"""
+            {"success":true,"idName":"customerIDs","customerIDs":[{{{manyIds}}}],"count":200}
+            """));
+
+        var result = await api.Customers.SearchAsync(new FieldRoutesCustomerSearchParameters());
+
+        Assert.Equal(100, result.IDs.Count);
+        Assert.Equal(1, result.IDs[0]);
+        Assert.Equal(100, result.IDs[99]);
+    }
+
+    [Fact]
+    public async Task Search_CustomMaxResults_TrimsIdsToSpecifiedLimit()
+    {
+        var manyIds = string.Join(",", Enumerable.Range(1, 50));
+        var (api, _) = Create(_ => TestHelpers.JsonResponse($$$"""
+            {"success":true,"idName":"customerIDs","customerIDs":[{{{manyIds}}}],"count":50}
+            """));
+
+        var result = await api.Customers.SearchAsync(new FieldRoutesCustomerSearchParameters { MaxResults = 10 });
+
+        Assert.Equal(10, result.IDs.Count);
+    }
+
+    [Fact]
+    public async Task Search_MaxResultsLargerThanResponse_ReturnsAll()
+    {
+        var (api, _) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"idName":"customerIDs","customerIDs":[1,2,3],"count":3}
+            """));
+
+        var result = await api.Customers.SearchAsync(new FieldRoutesCustomerSearchParameters { MaxResults = 500 });
+
+        Assert.Equal(3, result.IDs.Count);
+    }
+
+    [Fact]
+    public async Task GetBulk_DefaultMaxResults_LimitsIdsSentToApi()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":[{"customerID":1}]}
+            """));
+
+        var ids = Enumerable.Range(1, 200);
+        await api.Customers.GetBulkAsync(ids);
+
+        var body = await ReadBody(handler.Requests[0]);
+        var sentIds = body.GetProperty("customerIDs").EnumerateArray().ToList();
+        Assert.Equal(100, sentIds.Count);
+    }
+
+    [Fact]
+    public async Task GetBulk_CustomMaxResults_LimitsIdsSentToApi()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":[{"customerID":1}]}
+            """));
+
+        var ids = Enumerable.Range(1, 200);
+        await api.Customers.GetBulkAsync(ids, new FieldRoutesCustomerGetBulkParameters { MaxResults = 25 });
+
+        var body = await ReadBody(handler.Requests[0]);
+        var sentIds = body.GetProperty("customerIDs").EnumerateArray().ToList();
+        Assert.Equal(25, sentIds.Count);
+    }
+
+    [Fact]
+    public async Task GetBulk_WithoutParams_CustomMaxResults_LimitsIdsSentToApi()
+    {
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"result":[{"additionalContactID":1}]}
+            """));
+
+        var ids = Enumerable.Range(1, 200);
+        await api.AdditionalContacts.GetBulkAsync(ids, maxResults: 15);
+
+        var body = await ReadBody(handler.Requests[0]);
+        var sentIds = body.GetProperty("additionalContactIDs").EnumerateArray().ToList();
+        Assert.Equal(15, sentIds.Count);
+    }
 }
 
 public sealed class DiTests

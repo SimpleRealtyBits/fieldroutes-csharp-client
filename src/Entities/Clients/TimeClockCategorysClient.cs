@@ -19,15 +19,15 @@ public sealed class TimeClockCategorysClient
     public Task<FieldRoutesTimeClockCategory> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesTimeClockCategory>("timeClockCategory", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesTimeClockCategory>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesTimeClockCategory>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["clockCategoryIDs"] = ids.ToList(),
+            ["clockCategoryIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesTimeClockCategory>>("timeClockCategory", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesTimeClockCategory>> SearchAsync(FieldRoutesTimeClockCategorySearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesTimeClockCategory>("timeClockCategory", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesTimeClockCategory>("timeClockCategory", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }

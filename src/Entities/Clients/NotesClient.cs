@@ -25,16 +25,16 @@ public sealed class NotesClient
     public Task<int> DeleteAsync(FieldRoutesNoteDeleteRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("note", "delete", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesNote>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesNote>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["noteIDs"] = ids.ToList(),
+            ["noteIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesNote>>("note", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesNote>> SearchAsync(FieldRoutesNoteSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesNote>("note", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesNote>("note", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesNoteUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("note", "update", request.ToDictionary(), ct);

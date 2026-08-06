@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAppointmentGetBulkParameters
+public sealed class FieldRoutesAppointmentGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Send as 1 to retrieve an additional field cancellationReason.</summary>
     public int? IncludeCancellationReason { get; set; }

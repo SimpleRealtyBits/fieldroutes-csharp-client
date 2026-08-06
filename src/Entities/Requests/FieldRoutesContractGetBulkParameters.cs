@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesContractGetBulkParameters
+public sealed class FieldRoutesContractGetBulkParameters : FieldRoutesQueryBase
 {
     /// <summary>Send as 1 to retrieve a link to the document on AWS with a 15 day TTL.</summary>
     public int? IncludeDocumentLink { get; set; }

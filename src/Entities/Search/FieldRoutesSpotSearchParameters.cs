@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesSpotSearchParameters
+public sealed class FieldRoutesSpotSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     /// <summary>Primary key for spots.</summary>

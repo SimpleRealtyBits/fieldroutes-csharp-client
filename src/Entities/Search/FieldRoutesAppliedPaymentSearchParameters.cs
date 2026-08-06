@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesAppliedPaymentSearchParameters
+public sealed class FieldRoutesAppliedPaymentSearchParameters : FieldRoutesQueryBase
 {
     /// <summary>Primary key</summary>
     public int? AppliedPaymentID { get; set; }

@@ -31,7 +31,7 @@ public sealed class DocumentsClient
     public Task<List<FieldRoutesDocument>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesDocumentGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["uploadIDs"] = ids.ToList(),
+            ["uploadIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -39,7 +39,7 @@ public sealed class DocumentsClient
     }
 
     public Task<SearchResponse<FieldRoutesDocument>> SearchAsync(FieldRoutesDocumentSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesDocument>("document", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesDocument>("document", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesDocumentUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("document", "update", request.ToDictionary(), ct);

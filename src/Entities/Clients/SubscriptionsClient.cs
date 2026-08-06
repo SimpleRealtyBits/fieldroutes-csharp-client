@@ -34,7 +34,7 @@ public sealed class SubscriptionsClient
     public Task<List<FieldRoutesSubscription>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesSubscriptionGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["subscriptionIDs"] = ids.ToList(),
+            ["subscriptionIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -45,7 +45,7 @@ public sealed class SubscriptionsClient
         => _core.PostAsync<FieldRoutesSubscriptionGetInitialAddOnsResult>("subscription", "getInitialAddOns", request.ToDictionary(), ct);
 
     public Task<SearchResponse<FieldRoutesSubscription>> SearchAsync(FieldRoutesSubscriptionSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesSubscription>("subscription", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesSubscription>("subscription", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> SetInitialAddOnsAsync(FieldRoutesSubscriptionSetInitialAddOnsRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("subscription", "setInitialAddOns", request.ToDictionary(), ct);

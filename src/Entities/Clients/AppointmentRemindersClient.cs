@@ -22,16 +22,16 @@ public sealed class AppointmentRemindersClient
     public Task<int> CreateAsync(FieldRoutesAppointmentReminderCreateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("appointmentReminder", "create", request.ToDictionary(), ct);
 
-    public Task<List<FieldRoutesAppointmentReminder>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesAppointmentReminder>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["reminderIDs"] = ids.ToList(),
+            ["reminderIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesAppointmentReminder>>("appointmentReminder", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesAppointmentReminder>> SearchAsync(FieldRoutesAppointmentReminderSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesAppointmentReminder>("appointmentReminder", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesAppointmentReminder>("appointmentReminder", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesAppointmentReminderUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("appointmentReminder", "update", request.ToDictionary(), ct);

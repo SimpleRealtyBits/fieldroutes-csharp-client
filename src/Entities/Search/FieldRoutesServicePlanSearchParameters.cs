@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using FieldRoutesApiClient.Core;
 
 namespace FieldRoutesApiClient.Entities;
-public sealed class FieldRoutesServicePlanSearchParameters
+public sealed class FieldRoutesServicePlanSearchParameters : FieldRoutesQueryBase
 {
     public int? OfficeIDs { get; set; }
     /// <summary>Default: (0,1). 0: Frozen and no longer being placed in the job pool, 1: Active, -3: Lead</summary>

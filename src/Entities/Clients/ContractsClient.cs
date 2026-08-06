@@ -28,7 +28,7 @@ public sealed class ContractsClient
     public Task<List<FieldRoutesContract>> GetBulkAsync(IEnumerable<int> ids, FieldRoutesContractGetBulkParameters? parameters = null, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> { 
-            ["contractIDs"] = ids.ToList(),
+            ["contractIDs"] = ids.Take(parameters?.MaxResults ?? 100).ToList(),
         };
         if (parameters is not null)
             foreach (var (k, v) in parameters.ToDictionary()) d[k] = v;
@@ -36,7 +36,7 @@ public sealed class ContractsClient
     }
 
     public Task<SearchResponse<FieldRoutesContract>> SearchAsync(FieldRoutesContractSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesContract>("contract", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesContract>("contract", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
     public Task<int> UpdateAsync(FieldRoutesContractUpdateRequest request, CancellationToken ct = default)
         => _core.PostAsync<int>("contract", "update", request.ToDictionary(), ct);

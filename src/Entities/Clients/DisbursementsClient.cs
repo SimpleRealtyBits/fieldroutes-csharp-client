@@ -19,15 +19,15 @@ public sealed class DisbursementsClient
     public Task<FieldRoutesDisbursement> GetAsync(int id, CancellationToken ct = default)
         => _core.PostAsync<FieldRoutesDisbursement>("disbursement", id.ToString(CultureInfo.InvariantCulture), null, ct);
 
-    public Task<List<FieldRoutesDisbursement>> GetBulkAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    public Task<List<FieldRoutesDisbursement>> GetBulkAsync(IEnumerable<int> ids, int maxResults = 100, CancellationToken ct = default)
     {
         var d = new Dictionary<string, object?> {
-            ["gatewayDisbursementIDs"] = ids.ToList(),
+            ["gatewayDisbursementIDs"] = ids.Take(maxResults).ToList(),
         };
         return _core.PostAsync<List<FieldRoutesDisbursement>>("disbursement", "get", d, ct);
     }
 
     public Task<SearchResponse<FieldRoutesDisbursement>> SearchAsync(FieldRoutesDisbursementSearchParameters parameters, bool includeData = false, CancellationToken ct = default)
-        => _core.PostSearchAsync<FieldRoutesDisbursement>("disbursement", parameters.ToDictionary(includeData), ct);
+        => _core.PostSearchAsync<FieldRoutesDisbursement>("disbursement", parameters.ToDictionary(includeData), parameters.MaxResults, ct);
 
 }
