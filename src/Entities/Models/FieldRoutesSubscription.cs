@@ -80,7 +80,10 @@ public sealed class FieldRoutesSubscription
     public int? SourceID { get; set; }
     public string? Source { get; set; }
     public int? AnnualRecurringServices { get; set; }
-    public int? UnitIDs { get; set; }
+    // MANUAL FIX (2026-08-06): api.md types unitIDs as integer but real wire returns a JSON
+    // array of unit IDs (observed in subscription/get response, matches FieldRoutesCustomer.UnitIDs
+    // and FieldRoutesAppointment.UnitIDs) — fixed to int[]?. See api.md subscription/get response table.
+    public int[]? UnitIDs { get; set; }
     public int? RegionID { get; set; }
     public string? InitialInvoice { get; set; }
     public string? InitialBillingDate { get; set; }

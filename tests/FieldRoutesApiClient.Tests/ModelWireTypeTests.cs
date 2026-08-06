@@ -261,6 +261,16 @@ public sealed class ModelWireTypeTests
     }
 
     [Fact]
+    public void Subscription_ArrayUnitIDs_DoNotThrow()
+    {
+        var subscription = Deserialize<FieldRoutesSubscription>("""
+            { "subscriptionID": 900, "unitIDs": [21, 22, 23] }
+            """);
+
+        Assert.Equal([21, 22, 23], subscription.UnitIDs!);
+    }
+
+    [Fact]
     public void Employee_SkillArrays_AreArrays()
     {
         var employee = Deserialize<FieldRoutesEmployee>("""
