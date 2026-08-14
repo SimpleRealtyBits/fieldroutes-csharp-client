@@ -177,6 +177,45 @@ public sealed class TransportTests
     }
 
     [Fact]
+    public async Task Search_IdsUnderPropertyNameKey_AreParsed_WithoutThrowing()
+    {
+        // Real serviceType/search shape: the idName key ("serviceTypeIDs") is absent
+        // from the response and the ID list lives under the propertyName key
+        // ("serviceTypes"). Previously the scalar array was misparsed as entity data
+        // ("The JSON value could not be converted to ... Path: $[0]"), then, after the
+        // data guard, it was silently skipped — leaving Count=300 with empty IDs.
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"idName":"serviceTypeIDs","propertyName":"serviceTypes",
+             "serviceTypes":[1,2,3],"count":300}
+            """));
+
+        var result = await api.ServiceTypes.SearchAsync(new FieldRoutesServiceTypeSearchParameters());
+
+        Assert.Equal([1, 2, 3], result.IDs);
+        Assert.Equal(300, result.Count);
+        Assert.Equal("serviceTypes", result.PropertyName);
+        Assert.Null(result.Data);
+    }
+
+    [Fact]
+    public async Task Search_PropertyNameKeyHoldsIdScalars_SkipsDataInsteadOfThrowing()
+    {
+        // If FieldRoutes duplicates the ID list under the propertyName key alongside
+        // the real idName array, the scalar array must still be skipped as data.
+        var (api, handler) = Create(_ => TestHelpers.JsonResponse("""
+            {"success":true,"idName":"serviceTypeIDs","serviceTypeIDs":[1,2],
+             "propertyName":"serviceTypes","serviceTypes":[1,2],"count":2}
+            """));
+
+        var result = await api.ServiceTypes.SearchAsync(new FieldRoutesServiceTypeSearchParameters());
+
+        Assert.Equal([1, 2], result.IDs);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("serviceTypes", result.PropertyName);
+        Assert.Null(result.Data);
+    }
+
+    [Fact]
     public async Task GetBulk_ParsesEnvelopeResultArray()
     {
         var (api, handler) = Create(_ => TestHelpers.JsonResponse("""

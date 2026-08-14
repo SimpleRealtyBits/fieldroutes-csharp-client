@@ -179,6 +179,30 @@ internal sealed class FieldRoutesCore
         if (idName is not null && payload.TryGetProperty(idName, out var idEl) && idEl.ValueKind == JsonValueKind.Array)
             ids = DeserializeSafe<List<int>>(entity, "search", idEl, status, text) ?? new List<int>();
 
+        // MANUAL FIX (2026-08-13): serviceType/search omits the idName key entirely and
+        // puts the ID list under the propertyName key instead — live response:
+        // {"idName":"serviceTypeIDs","propertyName":"serviceTypes","serviceTypes":[1,2,...],
+        // "count":300} with no "serviceTypeIDs" member. Observed live: SearchAsync
+        // returned Count=300 with empty IDs, and before the data-array guard below the
+        // numbers under "serviceTypes" threw "The JSON value could not be converted to
+        // ...FieldRoutesServiceType. Path: $[0]". When the idName array is missing or
+        // empty, accept a scalar array under the propertyName candidates as the ID list.
+        if (ids.Count == 0)
+        {
+            foreach (var candidate in new[] { propertyNameData, propertyName })
+            {
+                if (candidate is null || candidate == idName) continue;
+                if (payload.TryGetProperty(candidate, out var idFallbackEl)
+                    && idFallbackEl.ValueKind == JsonValueKind.Array
+                    && idFallbackEl.GetArrayLength() > 0
+                    && idFallbackEl[0].ValueKind is not (JsonValueKind.Object or JsonValueKind.Array))
+                {
+                    ids = DeserializeSafe<List<int>>(entity, "search", idFallbackEl, status, text) ?? new List<int>();
+                    break;
+                }
+            }
+        }
+
         // Client-side guard: trim IDs before any downstream work to prevent unbounded result sets.
         if (ids.Count > maxResults)
             ids = ids.Take(maxResults).ToList();
@@ -189,6 +213,13 @@ internal sealed class FieldRoutesCore
             if (candidate is null || candidate == idName) continue;
             if (payload.TryGetProperty(candidate, out var dataEl) && dataEl.ValueKind == JsonValueKind.Array)
             {
+                // MANUAL FIX (2026-08-13): with the serviceType/search shape above, the
+                // "serviceTypes" array holds ID scalars, not resolved objects — so the
+                // data deserialization must only run when the array actually contains
+                // objects (or is empty). A scalar array means FieldRoutes echoed IDs,
+                // which are already consumed above; leave Data null.
+                if (dataEl.GetArrayLength() > 0 && dataEl[0].ValueKind != JsonValueKind.Object)
+                    continue;
                 data = DeserializeSafe<List<T>>(entity, "search", dataEl, status, text);
                 break;
             }
